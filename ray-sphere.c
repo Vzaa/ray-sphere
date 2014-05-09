@@ -37,7 +37,7 @@ int WINDOWSIZE  = 300; //Internal resolution
 
 int done = 0;
 
-Uint32 phong(renderer_t * rend, vec3D * q, int sp, vec3D * n, int status)
+Uint32 phong(renderer_t * rend, vec3D * p, vec3D * q, int sp, vec3D * n, int status)
 {
     int R,G,B;
     int Rd,Gd,Bd;
@@ -54,10 +54,13 @@ Uint32 phong(renderer_t * rend, vec3D * q, int sp, vec3D * n, int status)
     v.y = 0;
     v.z = 0;
 
+    veccopy(p, &v);
+
     //calculate n and diffuse light
     substract(q,&(rend->spheres[sp].center), n);
-    substract(&rend->l->pos,q, &temp);
     toUnit(n,n);
+
+    substract(&rend->l->pos,q, &temp);
     toUnit(&temp,&temp);
     d = dot(&temp,n);
     if(d < 0) d = 0;
@@ -175,6 +178,7 @@ Uint32 trace(renderer_t * rend, vec3D *p, vec3D *d, int step, int ignore)
     vec3D feelerD;
     vec3D n;
     vec3D r;
+    vec3D tmp;
     vec3D unitd;
     int sp;
     int dummy;
@@ -201,12 +205,15 @@ Uint32 trace(renderer_t * rend, vec3D *p, vec3D *d, int step, int ignore)
     closestQ(rend, &q,&feelerD,&dummy, &feelerI, &status, ignore, dl);
 
     //calculate local color
-    local = phong(rend, &q,sp, &n, status);
+    local = phong(rend, p, &q,sp, &n, status);
 
     //calculate reflection vector
-    mult(&n, 2 * dot(&n,&q), &r);
-    substract(&r,&q,&r);
-    mult(&r, -1, &r);
+    substract(&q, p, &tmp);
+    toUnit(&tmp, &tmp);
+
+    mult(&n, 2 * dot(&tmp,&n), &r);
+    substract(&tmp,&r,&r);
+    /*mult(&r, -1, &r);*/
     toUnit(&r, &r);
 
     reflected = trace(rend, &q, &r, step + 1, sp);
@@ -473,6 +480,9 @@ int main(int argc, char *argv[])
             if (rend.l->pos.x > 10)
                 dir = 1;
         }
+        /*veccopy(&rend.camera_pos, &rend.l->pos);*/
+        /*rend.l->pos.y += 5;*/
+
         /*rotatex(&rend.camera_dir, &rend.camera_dir, 0.017);*/
         /*rotatey(&rend.camera_dir, &rend.camera_dir, 0.017);*/
         /*rotatez(&rend.camera_dir, &rend.camera_dir, 0.017);*/
