@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
                 RENDERRES = atoi(optarg);
                 break;
             default: /* '?' */
-                fprintf(stderr, "Usage: %s [-r surface_resolution] [-w]\n",
+                fprintf(stderr, "Usage: %s [-r surface_resolution] [-w window_size]\n",
                         argv[0]);
                 exit(EXIT_FAILURE);
         }
